@@ -1,0 +1,40 @@
+This is an example of what ErrorLogs will contain. Can be deleted
+Fir Feb 29 00:00:00 2025: Error: Could not open the file 'credentials.txt'. Please ensure the file exists in the current directory and contains the necessary credentials.
+Fir Feb 29 00:00:00 2025: Error: Could not open the file 'credentials.txt'. Please ensure the file exists in the current directory and contains the necessary credentials.
+Fir Feb 29 00:00:00 2025: Error: Could not open the file 'credentials.txt'. Please ensure the file exists in the current directory and contains the necessary credentials.
+Fir Feb 29 00:00:00 2025: Error: Could not open the file 'credentials.txt'. Please ensure the file exists in the current directory and contains the necessary credentials.
+Fir Feb 29 00:00:00 2025: No columns to parse from file 
+Fir Feb 29 00:00:00 2025: No columns to parse from file 
+Fir Feb 29 00:00:00 2025: No columns to parse from file 
+Fir Feb 29 00:00:00 2025: No columns to parse from file 
+Fir Feb 29 00:00:00 2025: local variable 'df' referenced before assignment 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: local variable 'test' referenced before assignment 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: local variable 'test' referenced before assignment 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: local variable 'test' referenced before assignment 
+Fir Feb 29 00:00:00 2025: local variable 'test' referenced before assignment 
+Fir Feb 29 00:00:00 2025: local variable 'test' referenced before assignment 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: list indices must be integers or slices, not str 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: name 'response' is not defined 
+Fir Feb 29 00:00:00 2025: 'str' object has no attribute 'get' 
+Fir Feb 29 00:00:00 2025: 'str' object has no attribute 'get' 
+Fir Feb 29 00:00:00 2025: 'str' object has no attribute 'get' 
