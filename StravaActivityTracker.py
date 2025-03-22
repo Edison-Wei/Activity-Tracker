@@ -1,11 +1,8 @@
-from datetime import date, timedelta
-import time
 import csv
-import sys
-import argparse
 
 import requests
 import pandas as pd
+
 
 class Credentials:
     """
@@ -129,22 +126,25 @@ class StravaToken:
     #   Receives activities based on the most recent public activity visible in the club
     #   i.e club type (sport_type) is of 'ride': Will receive public activities of members who have posted with activity type 'ride' within the club
     #       club type (sport_type) is of 'run: Will receive public activities of members who have posted with activity type 'run' within the club
-    def club_data_repeat(self):
-        '''
-        Run this function only once
-        '''
+    def club_data_repeat(self, max_page_number):
         headers = ["date", "firstname", "lastname", "title", "distance", "moving_time", "elapsed_time", "total_elevation_gain", "type", "sport_type", "workout_type"]
         response = None
         page_number = 1
-        max_page_number = 50
+
+        # json_file = self.output_file
+        # if ".csv" in json_file:
+        #     json_file = json_file.removesuffix(".csv")
+        #     json_file += ".json"
 
         # To create a json file instead or with the csv file
-        # with open(self.output_file, 'a') as file:
+        #   uncomment the line below and the proceeding write .json file
+        # with open(json_file, 'w') as jsonfile:
         with open(self.output_file, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter=",")
             writer.writerow(headers)
 
-            while page_number < max_page_number:
+            while page_number <= max_page_number:
+
 
                 # Send a request to Strava for public activities in the specified club
                 # Returns a json of the most recent 30 (default) public activities
@@ -170,68 +170,11 @@ class StravaToken:
                 
                 # Write to the json file being created
                 # file.write(str(response.json()))
-                print(f'Finished Page: {page_number} with Status code: {response.status_code}')
+                
+                # Print Status code incase any errors occur when repeating
+                # print(f'Finished Page: {page_number} with Status code: {response.status_code}')
                 
                 page_number += 1
     
     def __str__(self):
         return str(self.credentials)
-
-def main(args):
-    strava_tokens = None
-
-    try:
-        with open("credentials.txt", 'r+') as file:  # Open the credentials.txt with read/write and closes once complete
-            credentials_content = file.readlines()
-            credentials = {}
-
-            for line in credentials_content:
-                if "=" in line:
-                    key, value = line.strip().split("=", 1)
-                    credentials[key.strip()] = value.strip()
-
-            strava_tokens = StravaToken(credentials=credentials, output_file=args)
-            # print("\n\nPrinting old StravaTokens")
-            # print(strava_tokens)
-
-            # strava_tokens.refresh_access_token()
-
-            # print("\n\nPrinting new StravaTokens")
-            # print(strava_tokens)
-            
-            # file.seek(0)
-            # for key, value in strava_tokens.credentials.__dict__.items():
-            #     file.write(f"{key}={value}\n")
-            print(strava_tokens)
-
-        # Set a timer for completion
-        starttime = time.perf_counter()
-        # strava_tokens.club_data()
-        # strava_tokens.club_data_repeat()
-        duration = timedelta(seconds=time.perf_counter()-starttime)
-        print("Club activity Retrieval and Formatting took: ", duration)
-
-        print("\nFile opened successfully and credentials loaded into StravaTokens object!\n")
-
-    except FileNotFoundError as e:
-        with open(f"ErrorLogs/{date.today()}.txt", "a") as f:
-            f.write(f"{time.ctime()}: ")
-            f.write(f"Error: Could not open the file {e}. Please ensure the file exists in the current directory and contains the necessary credentials.\n")
-    except Exception as e:
-        with open(f"ErrorLogs/{date.today()}.txt", "a") as f:
-            f.write(f"{time.ctime()}: ")
-            f.write(f"{str(e)} \n")
-
-if __name__ == "__main__":
-    try:
-        parser = argparse.ArgumentParser()
-        parser.add_argument("filename", help="Outputs values to the given filename or name of csv", type=str)
-        args = parser.parse_args()
-
-        filename = args.filename if ".csv" in args.filename else args.filename + ".csv"
-
-        main(filename)
-
-    except:
-        e = sys.exc_info()[0]
-        print (e)
