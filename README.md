@@ -1,4 +1,4 @@
-# Strava Club Activity Tracker
+# Activity Tracker
 
 ## Introduction
 
