@@ -2,13 +2,9 @@
 
 ## Introduction
 
-The Strava Club Activity Tracker allows members to fetch activity data from an specified Strava club and store the data in a CSV file. This application uses the Strava API to fetch the most recent public activities from a club, and can be configured to repeat requests made to gather data from multiple pages. (This can be automated with the use of CRON jobs or any other automation system)
+The Strava Club Activity Tracker allows members to fetch activity data from a specified Strava club and store the data in a CSV file. This application uses the Strava API to fetch the most recent public activities from a club and can be configured to repeat requests made to gather data from multiple pages. (This can be automated with the use of CRON jobs or any other automation system)
 
 This application provides an easy to use API authentication, token refreshing, and exporting activity data for sports like cycling (ride), running (run), or etc depending on the club's activity type.
-
-**WARNING:** You should get permission from clubs admin before gathering user data
-
-If you have any questions or issues, please contact sfucycling@gmail.com.
 
 ### Prerequisites:
 - Python 3.7 or higher
@@ -31,11 +27,15 @@ To run this application, you will first need to obtain your Strava credentials. 
    refresh_token=<YOUR_REFRESH_TOKEN>
    club_id=<YOUR_CLUB_ID>
    ```
-Both `expires_at` and `expires_in` in the credentials file are optional and not needed.
+Both `expires_at` and `expires_in` in the credentials file are optional and not required.
 
 ```bash
-python strava_activity_tracker.py <output_filename>.csv <page_number>
+python main.py <output_filename>.csv <page_number>
 ```
+
+# Demo
+[ActivityTrackerDemo](https://github.com/user-attachments/assets/8f964b76-f518-4b10-874d-c0519a2ecc24)
+
 
 ### Parameters:
 **Required**
@@ -44,15 +44,8 @@ python strava_activity_tracker.py <output_filename>.csv <page_number>
 **Optional**
 - `<page_number>`: The maximum number of pages (inclusive) the function will fetch from Strava activity (Default: 1) (Max 50 per minute set by Strava API)
 
-### Running the Script:
-Once you have set up the `credentials.txt` file, simply run the script as shown in the Usage section. The data will be stored in the specified CSV file.
-
-```bash
-python strava_activity_tracker.py activities.csv
-```
-
 ### Configuration:
-There is JSON support included only for the `repeat_club_data` function. You will have to manually uncomment the areas that will produce the JSON file. Specifically these lines:
+There is JSON support included only for the `repeat_club_data` function. You will have to manually uncomment the areas that will produce the JSON file. Specifically, these lines:
 ```
 # json_file = self.output_file
 # if ".csv" in json_file:
