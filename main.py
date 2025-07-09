@@ -18,7 +18,14 @@ def main(arg1, arg2):
                     key, value = line.strip().split("=", 1)
                     credentials[key.strip()] = value.strip()
 
+            if not credentials:
+                raise FileNotFoundError("")
             strava_tokens = StravaToken(credentials=credentials, output_file=arg1)
+            
+            file.seek(0)
+            cred_list = dir(strava_tokens)
+            for key, value in cred_list:
+                file.write(f'{key}={value}\n')
 
         if arg2 > 1:
             strava_tokens.club_data_repeat(page_number)

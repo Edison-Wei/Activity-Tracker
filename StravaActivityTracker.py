@@ -1,7 +1,7 @@
-import csv
-
+import time
 import requests
 import pandas as pd
+import numpy as np
 
 
 class Credentials:
@@ -20,6 +20,8 @@ class Credentials:
         self.client_secret = credentials.get("client_secret")
         self.access_token = credentials.get("access_token")
         self.refresh_token = credentials.get("refresh_token")
+        self.expires_at = credentials.get("expires_at")
+        self.expires_in = credentials.get("expires_in")
         self.club_id = credentials.get("club_id")
         
     def replace_old_tokens(self, new_tokens:dict):
@@ -41,6 +43,12 @@ class StravaToken:
     def __init__(self, credentials: dict, output_file: str):
         self.credentials = Credentials(credentials=credentials)
         self.output_file = output_file
+
+        expires_at = credentials.get("expires_at")
+        if expires_at is None:
+            self.refresh_access_token()
+        elif time.time() > float(expires_at):
+            self.refresh_access_token()
     
     # Post method to refresh the current access_token and refresh_token
     def refresh_access_token(self):
@@ -116,8 +124,14 @@ class StravaToken:
             check_data = pd.concat([df, pd.DataFrame.from_records(new_activity)], ignore_index=True)
         else:
             check_data = pd.DataFrame.from_records(new_activity)
+
+        json_file = self.output_file
+        if ".csv" in json_file:
+            json_file = json_file.removesuffix(".csv")
+            json_file += ".json"
             
-        check_data.to_csv(self.output_file, index=False, header=True)
+        check_data.to_csv(self.output_file, columns=headers, index=False)
+        check_data.to_json(json_file, orient="records", index=False)
 
     ###
     # Get method https://www.strava.com/api/v3/clubs/# for activity data of each member in the club 
@@ -128,53 +142,57 @@ class StravaToken:
     #       club type (sport_type) is of 'run: Will receive public activities of members who have posted with activity type 'run' within the club
     def club_data_repeat(self, max_page_number):
         headers = ["date", "firstname", "lastname", "title", "distance", "moving_time", "elapsed_time", "total_elevation_gain", "type", "sport_type", "workout_type"]
-        response = None
         page_number = 1
 
-        # json_file = self.output_file
-        # if ".csv" in json_file:
-        #     json_file = json_file.removesuffix(".csv")
-        #     json_file += ".json"
+        json_file = self.output_file
+        if ".csv" in json_file:
+            json_file = json_file.removesuffix(".csv")
+            json_file += ".json"
+        
+        new_activity = []
 
-        # To create a json file instead or with the csv file
-        #   uncomment the line below and the proceeding write .json file
-        # with open(json_file, 'w') as jsonfile:
-        with open(self.output_file, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=",")
-            writer.writerow(headers)
+        while page_number <= max_page_number:
 
-            while page_number <= max_page_number:
+            # Send a request to Strava for public activities in the specified club
+            # Returns a json of the most recent 30 (default) public activities
+            #   Also, depends on type (activity type) of the club
+            response = requests.get(f'https://www.strava.com/api/v3/clubs/{self.credentials.club_id}/activities',
+                                    params={'page': f'{page_number}', 'per_page': '30'},
+                                    headers={'Authorization': f'Authorization: Bearer {self.credentials.access_token}'},
+                                    timeout=5)
+            
+            for activity in response.json():
+                new_activity.append({
+                    "date": "",
+                    "firstname": activity.get('athlete').get('firstname'),
+                    "lastname": activity.get('athlete').get('lastname'),
+                    "title": activity.get('name'),
+                    "distance": activity.get('distance'),
+                    "moving_time": activity.get('moving_time'),
+                    "elapsed_time": activity.get('elapsed_time'),
+                    "total_elevation_gain": activity.get('total_elevation_gain'),
+                    "type": activity.get('type'),
+                    "sport_type": activity.get('sport_type'),
+                    "workout_type": ""
+                })
+            
+            # Print Status code incase any errors occur when repeating
+            # print(f'Finished Page: {page_number} with Status code: {response.status_code}')
+            
+            page_number += 1
+            
+        df = pd.DataFrame(new_activity, columns=headers)
 
-
-                # Send a request to Strava for public activities in the specified club
-                # Returns a json of the most recent 30 (default) public activities
-                #   Also, depends on type (activity type) of the club
-                response = requests.get(f'https://www.strava.com/api/v3/clubs/{self.credentials.club_id}/activities',
-                                        params={'page': f'{page_number}', 'per_page': '30'},
-                                        headers={'Authorization': f'Authorization: Bearer {self.credentials.access_token}'},
-                                        timeout=5)
-                
-                for activity in response.json():
-                    writer.writerow([
-                        "",
-                        activity.get('athlete').get('firstname'),
-                        activity.get('athlete').get('lastname'),
-                        activity.get('name'),
-                        activity.get('distance'),
-                        activity.get('moving_time'),
-                        activity.get('elapsed_time'),
-                        activity.get('total_elevation_gain'),
-                        activity.get('type'),
-                        activity.get('sport_type')
-                    ])
-                
-                # Write to the json file being created
-                # file.write(str(response.json()))
-                
-                # Print Status code incase any errors occur when repeating
-                # print(f'Finished Page: {page_number} with Status code: {response.status_code}')
-                
-                page_number += 1
+        df.to_csv(self.output_file, columns=headers, index=False)
+        df.to_json(json_file, orient="records", index=False)
     
     def __str__(self):
         return str(self.credentials)
+    
+    def __dir__(self):
+        cred_dict = vars(self.credentials)
+        cred_list = set()
+        for cred_key in cred_dict.keys():
+            cred_list.add((cred_key, cred_dict.get(cred_key)))
+        return cred_list
+    
