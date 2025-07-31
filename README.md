@@ -1,17 +1,16 @@
 # Strava Club Activity Tracker
-
-## Introduction
-
 The Strava Club Activity Tracker allows members to fetch activity data from an specified Strava club and store the data in a CSV file. This application uses the Strava API to fetch the most recent public activities from a club, and can be configured to repeat requests made to gather data from multiple pages. (This can be automated with the use of CRON jobs or any other automation system)
 
 This application provides an easy to use API authentication, token refreshing, and exporting activity data for sports like cycling (ride), running (run), or etc depending on the club's activity type.
-
-If you have any questions or issues, please contact sfucycling@gmail.com.
+There are 3 files of interest:
+   - main.py (Used to call StravaActivityTracker.py )
+   - StravaActivityTracker.py (Holds the class of Credentials, and StravaToken)
+   - CyclingAnalysis.py ([Conduct an analysis on the data](#questions-to-be-answered))
 
 # Demo
 [ActivityTrackerDemo](https://github.com/user-attachments/assets/8f964b76-f518-4b10-874d-c0519a2ecc24)
 
-### Prerequisites:
+### Setup
 - Python 3.7 or higher
 - `requests` version 2.32.3
 - `pandas` version 2.2.3
@@ -37,9 +36,25 @@ Once you finished the steps to create a developer account, copy the following cr
 
 Once you have set up the `credentials.txt` file. Run the following command
 ```bash
-python main.py StravaClubActivity 1
 python main.py <output_filename> <page_number>
+or
+python main.py <output_filename> <page_number> -r
 ```
+
+#### Questions to be answered:
+
+Once the Strava club data has been collected (any number of data points works), an analysis can be conducted with the following command:
+
+   Cleaning the data: distance, moving_time, elapsed_time and total_elevation_gain can not be 0 or NAN
+   1. Who has the most rides published
+   2. Calculate avg speed per ride or over all the rides distance/moving_time (maybe standard deviation)
+   3. Use KMeans to cluster rides into categories (based on distance, speed_kmh, and total_elevation_gain)
+         - Idea: Rides can be clustered into 3 groups short rides, elevation gain rides, long rides (ideally with no elevation gain)
+To run the analysis
+```bash
+python CyclingAnalysis.py
+```
+
 
 ### Parameters:
 **Required**
@@ -47,6 +62,8 @@ python main.py <output_filename> <page_number>
 
 **Optional**
 - `<page_number>`: The maximum number of pages (inclusive) the function will fetch from Strava activity (Default: 1) (Max 50 per minute set by Strava API)
+
+- `-r`: A Boolean to call the recursive function to collecting all the Strava club data
 
 ## Contributions
 

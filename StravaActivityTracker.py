@@ -1,7 +1,6 @@
 import time
 import requests
 import pandas as pd
-import numpy as np
 
 
 class Credentials:
@@ -75,7 +74,7 @@ class StravaToken:
     #   Receives activities based on the most recent public activities visible in the club.
     #   i.e club type (sport_type) is of 'ride': Will receive public activities of members who have posted with activity type 'ride' within the club
     #       club type (sport_type) is of 'run: Will receive public activities of members who have posted with activity type 'run' within the club
-    def club_data(self):
+    def club_data(self, max_page_number):
         """
         Get method https://www.strava.com/api/v3/clubs/# for activity data of the 30 most recent public activities in the club.\n
         Stored in the given output_file as a csv.\n
@@ -83,12 +82,6 @@ class StravaToken:
         i.e club type (sport_type) is of 'ride': Will receive public activities of members who have posted with activity type 'ride' within the club\n
             club type (sport_type) is of 'run: Will receive public activities of members who have posted with activity type 'run' within the club 
         """
-        response = requests.get(f'https://www.strava.com/api/v3/clubs/{self.credentials.club_id}/activities',
-                                headers={'Authorization': f'Authorization: Bearer {self.credentials.access_token}'},
-                                timeout=5)
-        if response.status_code != requests.codes.ok:
-            raise ConnectionError(f"Request club activities cannot be made to Strava: {response.reason}\n",
-                                  f" {response.text}\n")
         
         df = pd.DataFrame
         headers = ["date","firstname","lastname","title","distance","moving_time","elapsed_time","total_elevation_gain","type","sport_type","workout_type"]
@@ -99,26 +92,38 @@ class StravaToken:
 
         check_data = df[["firstname", "lastname", "title", "distance"]]
         new_activity = []
+        page_number = 1
 
-        for activity in response.json():
-            test = check_data[(check_data["firstname"]==activity.get('athlete').get('firstname')) &
-                            (check_data["lastname"]==activity.get('athlete').get('lastname')) &
-                            (check_data["title"]==activity.get('name')) &
-                            (check_data["distance"]==activity.get('distance'))]
-            if test.empty:
-                new_activity.append({
-                    "date": "",
-                    "firstname": activity.get('athlete').get('firstname'),
-                    "lastname": activity.get('athlete').get('lastname'),
-                    "title": activity.get('name'),
-                    "distance": activity.get('distance'),
-                    "moving_time": activity.get('moving_time'),
-                    "elapsed_time": activity.get('elapsed_time'),
-                    "total_elevation_gain": activity.get('total_elevation_gain'),
-                    "type": activity.get('type'),
-                    "sport_type": activity.get('sport_type'),
-                    "workout_type": ""
-                })
+        while page_number <= max_page_number:
+            response = requests.get(f'https://www.strava.com/api/v3/clubs/{self.credentials.club_id}/activities',
+                                    params={'page': f'{page_number}', 'per_page': '30'},
+                                    headers={'Authorization': f'Authorization: Bearer {self.credentials.access_token}'},
+                                    timeout=5)
+            if response.status_code != requests.codes.ok:
+                raise ConnectionError(f"Request club activities cannot be made to Strava: {response.reason}\n",
+                                    f" {response.text}\n")
+
+            for activity in response.json():
+                test = check_data[(check_data["firstname"]==activity.get('athlete').get('firstname')) &
+                                (check_data["lastname"]==activity.get('athlete').get('lastname')) &
+                                (check_data["title"]==activity.get('name')) &
+                                (check_data["distance"]==activity.get('distance'))]
+                if test.empty:
+                    new_activity.append({
+                        "date": "",
+                        "firstname": activity.get('athlete').get('firstname'),
+                        "lastname": activity.get('athlete').get('lastname'),
+                        "title": activity.get('name'),
+                        "distance": activity.get('distance'),
+                        "moving_time": activity.get('moving_time'),
+                        "elapsed_time": activity.get('elapsed_time'),
+                        "total_elevation_gain": activity.get('total_elevation_gain'),
+                        "type": activity.get('type'),
+                        "sport_type": activity.get('sport_type'),
+                        "workout_type": ""
+                    })
+            print(f"Page {page_number} has been saved")
+            page_number += 1
 
         if not df.empty:
             check_data = pd.concat([df, pd.DataFrame.from_records(new_activity)], ignore_index=True)
@@ -160,6 +165,9 @@ class StravaToken:
                                     params={'page': f'{page_number}', 'per_page': '30'},
                                     headers={'Authorization': f'Authorization: Bearer {self.credentials.access_token}'},
                                     timeout=5)
+            if response.status_code != requests.codes.ok:
+                raise ConnectionError(f"Request club activities cannot be made to Strava: {response.reason}\n",
+                                    f" {response.text}\n")
             
             for activity in response.json():
                 new_activity.append({
@@ -178,13 +186,14 @@ class StravaToken:
             
             # Print Status code incase any errors occur when repeating
             # print(f'Finished Page: {page_number} with Status code: {response.status_code}')
-            
+            print(f"Page {page_number} has been saved")
             page_number += 1
             
         df = pd.DataFrame(new_activity, columns=headers)
 
         df.to_csv(self.output_file, columns=headers, index=False)
         df.to_json(json_file, orient="records", index=False)
+        print(f"All club data from Strava has been saved")
     
     def __str__(self):
         return str(self.credentials)
@@ -195,4 +204,3 @@ class StravaToken:
         for cred_key in cred_dict.keys():
             cred_list.add((cred_key, cred_dict.get(cred_key)))
         return cred_list
-    
