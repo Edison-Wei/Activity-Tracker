@@ -48,8 +48,12 @@ Once the Strava club data has been collected (any number of data points works), 
    Cleaning the data: distance, moving_time, elapsed_time and total_elevation_gain can not be 0 or NAN
    1. Who has the most rides published
    2. Calculate avg speed per ride or over all the rides distance/moving_time (maybe standard deviation)
-   3. Use KMeans to cluster rides into categories (based on distance, speed_kmh, and total_elevation_gain)
-         - Idea: Rides can be clustered into 3 groups short rides, elevation gain rides, long rides (ideally with no elevation gain)
+   3. Use KMeans to cluster rides into categories (based on distance, speed_kmh, and total_elevation_gain), to predict a comfortable ride pace and distance
+         - Idea: Rides can be clustered into 4 groups
+            - Short ride with low elevation
+            - Short ride with elevation gain
+            - Long ride with low elevation
+            - Long ride with elevation gain
 To run the analysis
 ```bash
 python CyclingAnalysis.py

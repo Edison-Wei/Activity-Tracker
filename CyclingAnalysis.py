@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
 
 
 def published_most_rides(club_data):
@@ -21,8 +22,8 @@ def calculate_avg_speed(club_data):
     club_data_copy['speed_kmh'] = club_data_copy['speed_ms'] * 3.6
 
     # Converting to km/h instead of m/s (distance(m) to distance(km), moving_time(s) to moving_time(h))
-    club_data_copy['distance'] = club_data_copy['distance'] / 1000
-    club_data_copy['moving_time'] = club_data_copy['moving_time'] / 3600
+    club_data_copy['distance_km'] = club_data_copy['distance'] / 1000
+    club_data_copy['moving_time_hr'] = club_data_copy['moving_time'] / 3600
 
     avg_speed_grouped = club_data_copy.groupby(['firstname', 'lastname'])
     avg_speed_club = avg_speed_grouped[['speed_ms', 'speed_kmh']].mean(numeric_only=True)
@@ -35,21 +36,33 @@ def calculate_avg_speed(club_data):
     return club_data_copy
 
 
-def k_mean_something(club_data):
-    scaler = StandardScaler()
+def k_mean_clustering(club_data):
+    filters = [{'colour':'forestgreen', 'label': 'long ride, low elev', 'cluster': 0}, {'colour':'blue', 'label': 'short ride, low elev', 'cluster': 1}, {'colour':'orange', 'label': 'short ride, elev gain', 'cluster': 2}, {'colour':'brown', 'label': 'long ride, elev gain', 'cluster': 3}]
+    convert_to_names = {0:'long ride, low elev', 1:'short ride, low elev', 2:'short ride, elev gain', 3:'long ride, elev gain'}
+    club_data_copy = club_data.copy()
 
-    model = KMeans(n_clusters=3)
-    club_data['cluster'] = model.fit_predict(scaler.fit_transform(club_data[['distance', 'speed_kmh', 'total_elevation_gain']]))
+
+    model = make_pipeline(
+        StandardScaler(),
+        KMeans(n_clusters=4, n_init=10, random_state=2)
+    )
+
+    club_data_copy['cluster'] = model.fit_predict(club_data_copy[['distance_km', 'speed_kmh', 'total_elevation_gain']])
 
     plt.figure(1)
-    plt.scatter(club_data['distance'], club_data['total_elevation_gain'], c=club_data['cluster'], edgecolors='k')
+    for filter in filters:
+        data = club_data_copy[club_data_copy['cluster'] == filter['cluster']]
+        plt.scatter(data['distance_km'], data['total_elevation_gain'], c=filter['colour'], label=filter['label'], edgecolors='k')
 
     plt.xlabel("Distance (km)")
     plt.ylabel("Elevation Gain (m)")
     plt.title("KMeans Clustering of Rides (k=3)")
+    plt.legend()
     plt.show()
 
-    print(club_data.groupby("cluster")[["distance", "speed_kmh", "total_elevation_gain"]].mean().round(2))
+    club_data_copy['cluster'] = club_data_copy.cluster.map(convert_to_names)    
+
+    print(club_data_copy.groupby("cluster")[['distance_km', 'speed_kmh', 'total_elevation_gain']].mean().round(2))
 
 
 def main():
@@ -63,10 +76,14 @@ def main():
         Questions:
             Clean data
                 distance, moving_time, elapsed_time, total_elevation_gain from any 0 or NAN values
-            1. Who has the most rides published
-            2. Calculate avg speed per ride or over all the rides distance/moving_time (maybe standard deviation)
-            3. Use KMeans to cluster rides into categories (based on distance, speed_kmh, and total_elevation_gain)
-                - Idea: Rides can be clustered into 3 groups short rides, elevation gain rides, long rides (ideally with no elevation gain)
+                    1. Who has the most rides published
+                    2. Calculate avg speed per ride or over all the rides distance/moving_time (maybe standard deviation)
+                    3. Use KMeans to cluster rides into categories (based on distance, speed_kmh, and total_elevation_gain), to predict a comfortable ride pace and distance
+                        - Idea: Rides can be clustered into 4 groups
+                            - Short ride with low elevation
+                            - Short ride with elevation gain
+                            - Long ride with low elevation
+                            - Long ride with elevation gain
     """
     club_data = pd.read_csv('CyclingData.csv')
 
@@ -77,7 +94,7 @@ def main():
 
     club_data = calculate_avg_speed(club_data_filtered)
 
-    k_mean_something(club_data)
+    k_mean_clustering(club_data)
     
 
 if __name__ == '__main__':
