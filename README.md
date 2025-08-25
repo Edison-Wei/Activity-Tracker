@@ -8,7 +8,7 @@ There are 3 files of interest:
    - CyclingAnalysis.py ([Analysis on the data](#questions-to-be-answered))
 
 # Demo
-[ActivityTrackerDemo](https://github.com/user-attachments/assets/79e6c5eb-9047-487d-ba03-906addbc9540)
+[ActivityTrackerDemo](https://github.com/user-attachments/assets/162a0673-1af8-4d3b-8e04-1bc24c9493d9)
 
 ### Setup
 - Python 3.10 or higher
