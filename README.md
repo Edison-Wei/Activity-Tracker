@@ -5,16 +5,19 @@ This application provides an easy to use API authentication, token refreshing, a
 There are 3 files of interest:
    - main.py (Used to call StravaActivityTracker.py )
    - StravaActivityTracker.py (Holds the class of Credentials, and StravaToken)
-   - CyclingAnalysis.py ([Conduct an analysis on the data](#questions-to-be-answered))
+   - CyclingAnalysis.py ([Analysis on the data](#questions-to-be-answered))
 
 # Demo
-[ActivityTrackerDemo](https://github.com/user-attachments/assets/8f964b76-f518-4b10-874d-c0519a2ecc24)
+[ActivityTrackerDemo](https://github.com/user-attachments/assets/79e6c5eb-9047-487d-ba03-906addbc9540)
 
 ### Setup
-- Python 3.7 or higher
+- Python 3.10 or higher
 - `requests` version 2.32.3
 - `pandas` version 2.2.3
-- `numpy` version 2.2.5
+
+For the analysis:
+- `matplotlib` version 3.10.0
+- `scikit-learn` version 1.6.1
 
 To install the dependencies:
 
